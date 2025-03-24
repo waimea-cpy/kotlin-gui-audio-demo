@@ -1,20 +1,19 @@
 /**
  * ===============================================================
- * Kotlin GUI Starter
+ * Kotlin GUI Audio Demo
  * ===============================================================
  *
- * This is a starter project for a simple Kotlin GUI application.
- * The Java Swing library is used, plus the FlatLAF look-and-feel
- * for a reasonably modern look.
+ * This is a demo showing how audio files can be played in a
+ * Kotlin / Swing GUI
  *
- * The app is structured to provide a simple view / model setup
- * with the App class storing application data (the 'model'), and
- * the MainWindow class providing the 'view'.
+ * Audio files are pulled from a sounds folder within the src
+ * folder. Audio needs to be **WAV** format (not MP3).
  */
 
 import com.formdev.flatlaf.FlatDarkLaf
 import java.awt.*
 import java.awt.event.*
+import javax.sound.sampled.AudioSystem
 import javax.swing.*
 
 
@@ -34,16 +33,19 @@ fun main() {
  * stored, plus any application logic functions
  */
 class App() {
-    // Constants defining any key values
-    val MAX_CLICKS = 10
-
     // Data fields
-    var clicks = 0
+    val soundFiles = listOf(
+        "boom.wav",
+        "bell.wav",
+        "quack.wav",
+        "honk.wav",
+        "laser.wav"
+    )
+    var currentSoundFile = soundFiles.random()
 
     // Application logic functions
-    fun updateClickCount() {
-        clicks++
-        if (clicks > MAX_CLICKS) clicks = MAX_CLICKS
+    fun pickRandomSound() {
+        currentSoundFile = soundFiles.random()
     }
 }
 
@@ -57,7 +59,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
 
     // Fields to hold the UI elements
     private lateinit var infoLabel: JLabel
-    private lateinit var helloButton: JButton
+    private lateinit var playButton: JButton
 
     /**
      * Configure the UI and display it
@@ -68,8 +70,6 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
 
         setLocationRelativeTo(null)     // Centre the window
         isVisible = true                // Make it visible
-
-        updateView()                    // Initialise view with model data
     }
 
     /**
@@ -77,7 +77,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
      */
     private fun configureWindow() {
         title = "Kotlin Swing GUI Demo"
-        contentPane.preferredSize = Dimension(600, 350)
+        contentPane.preferredSize = Dimension(400, 175)
         defaultCloseOperation = WindowConstants.EXIT_ON_CLOSE
         isResizable = false
         layout = null
@@ -89,19 +89,19 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
      * Populate the UI with UI controls
      */
     private fun addControls() {
-        val baseFont = Font(Font.SANS_SERIF, Font.PLAIN, 36)
+        val baseFont = Font(Font.SANS_SERIF, Font.PLAIN, 24)
 
-        infoLabel = JLabel("INFO HERE")
+        infoLabel = JLabel("Ready to play a sound")
         infoLabel.horizontalAlignment = SwingConstants.CENTER
-        infoLabel.bounds = Rectangle(50, 50, 500, 100)
+        infoLabel.bounds = Rectangle(25, 25, 350, 50)
         infoLabel.font = baseFont
         add(infoLabel)
 
-        helloButton = JButton("Click Me!")
-        helloButton.bounds = Rectangle(50,200,500,100)
-        helloButton.font = baseFont
-        helloButton.addActionListener(this)     // Handle any clicks
-        add(helloButton)
+        playButton = JButton("Play a Sound")
+        playButton.bounds = Rectangle(25, 100, 350, 50)
+        playButton.font = baseFont
+        playButton.addActionListener(this)     // Handle any clicks
+        add(playButton)
     }
 
 
@@ -110,13 +110,7 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
      * of the application model
      */
     fun updateView() {
-        if (app.clicks == app.MAX_CLICKS) {
-            infoLabel.text = "Max clicks reached!"
-            helloButton.isEnabled = false
-        }
-        else {
-            infoLabel.text = "You clicked ${app.clicks} times"
-        }
+        infoLabel.text = "Playing ${app.currentSoundFile}..."
     }
 
     /**
@@ -126,9 +120,18 @@ class MainWindow(val app: App) : JFrame(), ActionListener {
      */
     override fun actionPerformed(e: ActionEvent?) {
         when (e?.source) {
-            helloButton -> {
-                app.updateClickCount()
+            playButton -> {
+                // Select a sound to play from app data
+                app.pickRandomSound()
+                // Update the view's info
                 updateView()
+
+                // Play the sound
+                val soundFile = this::class.java.getResourceAsStream("sounds/" + app.currentSoundFile)
+                val soundStream = AudioSystem.getAudioInputStream(soundFile)
+                val soundClip = AudioSystem.getClip()
+                soundClip.open(soundStream)
+                soundClip.start()
             }
         }
     }

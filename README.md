@@ -1,8 +1,8 @@
-# Kotlin GUI Starter
+# Kotlin GUI Audio Demo
 
-This is a starter project for a simple Kotlin GUI application.
+This is a demo showing how audio files can be played in a Kotlin / Swing GUI
 
-The Java Swing library is used, plus the FlatLAF look-and-feel for a reasonably modern look.
+Audio files are pulled from a **sounds folder** within the [src](src/) folder. Audio needs to be **WAV** format (not MP3).
 
-The app is structured to provide a simple view / model setup with the App class storing application data (the 'model'), and the MainWindow class providing the 'view'.
+![demo.gif](demo.gif)
 
